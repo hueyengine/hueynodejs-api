@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { Category } = require('../../models');
+const { Category, Course } = require('../../models');
 const { Op } = require('sequelize');
 
 const { NotFoundError, success, failure } = require('../../utils/response');
@@ -14,21 +14,27 @@ const { NotFoundError, success, failure } = require('../../utils/response');
 function filterBody(req) {
     return {
         name: req.body.name,
-        rank: req.body,
+        rank: req.body.rank,
     };
 }
 
 /**
- * 查询当前分类
+ * 公共方法：查询当前分类
  */
 async function getCategory(req) {
     const { id } = req.params;
+    const condition = {
+        include: [
+            {
+                model: Course,
+                as: 'courses',
+            },
+        ],
+    };
 
-    // 查询分类
-    const category = await Category.findByPk(id);
-
+    const category = await Category.findByPk(id, condition);
     if (!category) {
-        throw new NotFoundError(`Category with ID ${id} does not exist.`);
+        throw new NotFoundError(`ID: ${id}的分类未找到。`);
     }
 
     return category;
@@ -48,7 +54,10 @@ router.get('/', async function (req, res) {
         console.log('Query parameters:', query);
 
         const condition = {
-            order: [['id', 'DESC']],
+            order: [
+                ['rank', 'ASC'],
+                ['id', 'ASC'],
+            ],
             limit: pageSize,
             offset: offset,
         };
@@ -74,11 +83,6 @@ router.get('/', async function (req, res) {
     } catch (error) {
         console.error('Error fetching categories:', error);
 
-        // res.status(500).json({
-        //     status: false,
-        //     message: 'Error fetching categories',
-        //     errors: [error.message || 'An error occurred while fetching categories.'],
-        // });
         failure(res, error);
     }
 });
@@ -93,12 +97,6 @@ router.get('/:id', async function (req, res) {
         success(res, '查询分类成功', category);
     } catch (error) {
         console.error('Error quering category detail:', error);
-        // res.status(500).json({
-        //     status: false,
-        //     message: '查询分类失败。',
-        //     errors: [error.message],
-        // });
-
         failure(res, error);
     }
 });
@@ -111,17 +109,13 @@ router.post('/', async function (req, res) {
     try {
         // 白名单过滤
         const body = filterBody(req);
+        console.log(222, body);
 
         const category = await Category.create(body);
         success(res, '分类创建成功', { category }, 201);
     } catch (error) {
         console.error('Error creating category:', error);
-        // res.status(500).json({
-        //     status: false,
-        //     message: '分类创建失败。',
-        //     errors: [error.message || 'An error occurred while creating the category.'],
-        // });
-        failure(res, error)
+        failure(res, error);
     }
 });
 
@@ -139,23 +133,8 @@ router.put('/:id', async function (req, res) {
         success(res, '更新分类成功', { category });
     } catch (error) {
         console.error('Error updating category:', error);
-        // if (error.name === 'SequelizeValidationError') {
-        //     const errors = error.errors.map((e) => e.message);
 
-        //     res.status(400).json({
-        //         status: false,
-        //         message: '请求参数错误。',
-        //         errors,
-        //     });
-        // } else {
-        //     res.status(500).json({
-        //         status: false,
-        //         message: '创建分类失败。',
-        //         errors: [error.message],
-        //     });
-        // }
-
-        failure(res, error)
+        failure(res, error);
     }
 });
 
@@ -167,17 +146,16 @@ router.delete('/:id', async function (req, res) {
     try {
         const category = await getCategory(req);
 
+        const count = await Course.count({ where: { categoryId: req.params.id } });
+        if (count > 0) {
+            throw new Error('当前分类有课程，无法删除。');
+        }
+
         await category.destroy();
 
         success(res, '删除分类成功。');
     } catch (error) {
         console.error('Error deleting category:', error);
-        // res.status(500).json({
-        //     status: false,
-        //     message: '删除分类失败。',
-        //     errors: [error.message],
-        // });
-
         failure(res, error);
     }
 });
