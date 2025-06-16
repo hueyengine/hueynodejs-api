@@ -10,12 +10,12 @@ const { success, failure } = require('../../utils/responses');
 /**
  * 公共方法：白名单过滤
  * @param req
- * @returns {{image: *, name, introductory: (boolean|*), userId: (number|*), categoryId: (number|*), content, recommended: (boolean|*)}}
+ * @returns {{image: *, name, introductory: (boolean|*), categoryId: (number|*), content, recommended: (boolean|*)}}
  */
 function filterBody(req) {
     return {
         categoryId: req.body.categoryId,
-        userId: req.body.userId,
+        // userId: req.body.userId, // 这里不需要，谁登录就是谁操作的
         name: req.body.name,
         image: req.body.image,
         recommended: req.body.recommended,
@@ -153,20 +153,20 @@ router.get('/:id', async function (req, res) {
         failure(res, error);
     }
 });
-
 /**
  * 创建课程
  * POST /admin/courses
  */
 router.post('/', async function (req, res) {
     try {
-        // 白名单过滤
         const body = filterBody(req);
 
+        // 获取当前登录的用户 ID
+        body.userId = req.user.id;
+
         const course = await Course.create(body);
-        success(res, '课程创建成功', { course }, 201);
+        success(res, '创建课程成功。', { course }, 201);
     } catch (error) {
-        console.error('Error creating course:', error);
         failure(res, error);
     }
 });

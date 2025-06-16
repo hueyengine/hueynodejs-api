@@ -1,15 +1,3 @@
-/**
- * 自定义 404 错误类
- */
-
-class NotFoundError extends Error {
-    constructor(message = '资源未找到') {
-        super(message);
-        this.name = 'NotFoundError';
-        this.statusCode = 404;
-    }
-}
-
 function success(res, message, data = {}, code = 200) {
     res.status(code).json({
         status: true,
@@ -54,6 +42,22 @@ function failure(res, error) {
             status: false,
             message: '认证失败',
             errors: [error.message],
+        });
+    }
+
+    if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+            status: false,
+            message: '认证失败',
+            errors: ['您提交的 token 错误。'],
+        });
+    }
+
+    if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({
+            status: false,
+            message: '认证失败',
+            errors: ['您的 token 已过期。'],
         });
     }
 
