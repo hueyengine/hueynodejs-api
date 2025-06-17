@@ -2,8 +2,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const adminAuth = require('./middlewares/admin-auth');
-const userAuth = require('./middlewares/user-auth');
 const cors = require('cors')
 
 // CORS 跨域配置
@@ -12,6 +10,9 @@ const corsOptions = {
 };
 
 require('dotenv').config();
+
+const adminAuth = require('./middlewares/admin-auth');
+const userAuth = require('./middlewares/user-auth');
 
 // 前台路由文件
 const indexRouter = require('./routes/index');
