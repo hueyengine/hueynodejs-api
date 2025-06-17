@@ -1,42 +1,79 @@
-# 开发手册
+# 介绍
+项目使用了 Node.js + Express + MySQL + Sequelize ORM 开发。
 
-## 一、初始化项目
+## 配置环境变量
 
-### 1.1、安装全局包
+将`.env.example`文件拷贝为`.env`文件，并修改配置。
 
-开发Node.js项目，首先，要全局安装两个包。
+```txt
+PORT=3000
+SECRET=你的秘钥
+```
 
-|   命令  | 说明 |
-| :--------  | :-----  |
-| npm i -g express-generator@4 | 安装 express 脚手架 |
-| npm i -g sequelize-cli | 安装 sequelize 命令行工具 |
+其中`PORT`配置为服务端口，`SECRET`配置为秘钥。
 
-先安装了 express 脚手架，这样就可以用命令创建 Express 项目。接着安装了sequelize-cli，这样才能执行模型、迁移、种子相关的命令。因为它们都是全局安装的，所以在电脑上，只需要运行一次，就不用重复再次安装了。
+## 生成秘钥
 
-### 1.2、初始化项目
-- 创建项目，并指定不需要视图文件。还要记得，要删除 public/index.html 文件。
-- 接着要用 cd 命令，进入项目里。
-npm i 安装项目所需依赖包。
-- 安装 nodemon，装完后，记得要配置 package.json，这样修改代码后无需重启服务。
-- 安装 sequelize 与 mysql2 依赖包。这样项目里才能使用 sequelize 操作 mysql。
-- 然后初始化 sequelize，会生成 ORM 所需要的目录和配置文件。记得修改 config/config.json 文件中数据库连接的配置。
-- npm start 后，就可以通过http://localhost:3000来访问了。
+在命令行中运行 
 
-### 1.3、初始化数据库
-- 先要去创建数据库了。也可以使用命令创建，但在部分 Windows 中无法成功创建，那就直接使用 Navicat 手动创建也一样。
-- 然后根据需求，去创建模型。记住模型是单数，但是表名是复数。并指定所需字段和类型，同时还会自动生成相关的迁移文件。
-- 打开迁移文件后，根据需求人工进行调整。改完后，运行迁移命令，就会自动的创建表了。
-- 可以使用种子文件，来给表中添加测试数据，而不用通过 SQL 导入默认测试数据。
-- 根据需求调整种子文件。然后运行一下种子，就会自动填充数据到表里了。
-- 还有个命令，它会运行所有的种子文件。缺点是无论之前有没有运行过，都会全部重新运行一次。所以这个命令只适合数据库还什么数据都没有的情况下。
+```shell
+node
+```
 
-|   命令  | 说明 |
-| :--------  | :-----  |
-| sequelize db:create --charset utf8mb4 --collate utf8mb4_general_ci | 创建数据库 |
-| sequelize model:generate --name Article --attributes title:string,content:text | 创建模型 |
-| sequelize db:migrate | 运行迁移文件 |
-| sequelize seed:generate --name article | 创建种子文件 |
-| sequelize db:seed --seed xxx-article | 运行指定种子文件 |
-| sequelize db:seed:all | 运行所有种子文件 |
+进入交互模式后，运行
 
-## 二、Express 的路由配置
+```shell
+const crypto = require('crypto');
+console.log(crypto.randomBytes(32).toString('hex'));
+```
+
+复制得到的秘钥，并填写到`.env`文件中的`SECRET`配置。
+
+> PS：可以使用 `ctrl + c` 退出交互模式。
+
+## 配置数据库
+
+项目使用 Docker 容器运行 MySQL 数据库。安装好 Docker 后，可直接启动 MySQL。
+
+```shell
+docker-compose up -d
+```
+
+如需使用自行安装的 MySQL，需要修改`config/config.json`文件中的数据库用户名与密码。
+
+```json
+{
+  "development": {
+    "username": "您的数据库用户名",
+    "password": "您的数据库密码"
+  }
+}
+```
+
+## 安装与运行
+
+```shell
+# 安装项目依赖包
+npm i
+
+# 创建数据库。如创建失败，可以手动建库。
+npx sequelize-cli db:create --charset utf8mb4 --collate utf8mb4_general_ci
+
+# 运行迁移，自动建表。
+npx sequelize-cli db:migrate
+
+# 运行种子，填充初始数据。
+npx sequelize-cli db:seed:all
+
+# 启动服务
+npm start
+```
+
+访问地址：[http://localhost:3000](http://localhost:3000)，详情请看接口文档。
+
+## 初始管理员账号
+
+```txt
+账号：admin
+密码: 123123
+```
