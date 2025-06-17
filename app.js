@@ -4,11 +4,12 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const adminAuth = require('./middlewares/admin-auth');
 const userAuth = require('./middlewares/user-auth');
+const cors = require('cors')
+
 // CORS 跨域配置
 const corsOptions = {
-    origin: ['https://clwy.cn', 'http://localhost:63342'],
+    origin: ['https://clwy.cn', 'http://127.0.0.1:8080'],
 };
-app.use(cors(corsOptions));
 
 require('dotenv').config();
 
@@ -35,6 +36,8 @@ const adminChartsRouter = require('./routes/admin/charts');
 const adminAuthRouter = require('./routes/admin/auth');
 
 const app = express();
+
+app.use(cors(corsOptions));
 
 app.use(logger('dev'));
 app.use(express.json());
