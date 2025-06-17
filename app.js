@@ -4,6 +4,12 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const adminAuth = require('./middlewares/admin-auth');
 const userAuth = require('./middlewares/user-auth');
+// CORS 跨域配置
+const corsOptions = {
+    origin: ['https://clwy.cn', 'http://localhost:63342'],
+};
+app.use(cors(corsOptions));
+
 require('dotenv').config();
 
 // 前台路由文件
