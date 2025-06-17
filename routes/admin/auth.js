@@ -14,8 +14,6 @@ const crypto = require('crypto');
  */
 router.post('/sign_in', async (req, res) => {
     try {
-        // console.log(crypto.randomBytes(32).toString('hex'));
-        
         const { login, password } = req.body;
 
         if (!login) {

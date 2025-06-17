@@ -52,8 +52,6 @@ router.get('/', async function (req, res) {
         const pageSize = Math.abs(Number(query.pageSize)) || 10;
 
         const offset = (currentPage - 1) * pageSize;
-        console.log('Query parameters:', query);
-
         const condition = {
             order: [
                 ['rank', 'ASC'],
@@ -110,7 +108,6 @@ router.post('/', async function (req, res) {
     try {
         // 白名单过滤
         const body = filterBody(req);
-        console.log(222, body);
 
         const category = await Category.create(body);
         success(res, '分类创建成功', { category }, 201);

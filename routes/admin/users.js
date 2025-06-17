@@ -53,7 +53,6 @@ router.get('/', async function (req, res) {
         const pageSize = Math.abs(Number(query.pageSize)) || 10;
 
         const offset = (currentPage - 1) * pageSize;
-        console.log('Query parameters:', query);
 
         const condition = {
             order: [['id', 'DESC']],
